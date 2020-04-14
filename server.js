@@ -12,6 +12,31 @@ mongoose.set('useUnifiedTopology', true);
 
 let server;
 
+// retrieve all the blogposts
+app.get('/blogposts', (req, res) => {
+  res.send('all the blogposts');
+});
+
+// retrieve one blogpost by id
+app.get('/blogposts/:id', (req, res) => {
+  res.send(`one blogpost with id: ${req.params.id}`);
+});
+
+// add a blogpost
+app.post('/blogposts', (req, res) => {
+  res.send('added a blogpost');
+});
+
+// update one blogpost by id
+app.put('/blogposts/:id', (req, res) => {
+  res.send(`update one blogpost with id: ${req.params.id}`);
+});
+
+// delete one blogpost by id
+app.delete('/blogposts/:id', (req, res) => {
+  res.send(`delete one blogpost with id: ${req.params.id}`);
+});
+
 // this function connects to our database, then starts the server
 function runServer(databaseUrl, port) {
   return new Promise((resolve, reject) => {
