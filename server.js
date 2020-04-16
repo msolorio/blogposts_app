@@ -5,7 +5,10 @@ const mongoose = require('mongoose');
 
 const { DATABASE_URL, PORT} = require('./config');
 
+const {Blogpost} = require("./models");
+
 const app = express();
+app.use(express.json());
 
 mongoose.set('useNewUrlParser', true);
 mongoose.set('useUnifiedTopology', true);
@@ -14,7 +17,11 @@ let server;
 
 // retrieve all the blogposts
 app.get('/blogposts', (req, res) => {
-  res.send('all the blogposts');
+  // res.send('all the blogposts');
+  Blogpost.find({}).then((blogposts) => {
+    res.json({blogposts: blogposts});
+    
+  });
 });
 
 // retrieve one blogpost by id
@@ -24,7 +31,15 @@ app.get('/blogposts/:id', (req, res) => {
 
 // add a blogpost
 app.post('/blogposts', (req, res) => {
-  res.send('added a blogpost');
+  Blogpost.create({
+    title: req.body.title,
+    content: req.body.content,
+    author: req.body.author
+  }).then((blogpost) => {
+    res.status(201).json(blogpost);
+  }).catch((error) => {
+    res.status(500).json({message: "Internal Server Error"});
+  })
 });
 
 // update one blogpost by id
