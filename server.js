@@ -12,21 +12,24 @@ app.use(express.json());
 
 mongoose.set('useNewUrlParser', true);
 mongoose.set('useUnifiedTopology', true);
-
-let server;
+mongoose.set('useFindAndModify', false);
 
 // retrieve all the blogposts
 app.get('/blogposts', (req, res) => {
-  // res.send('all the blogposts');
-  Blogpost.find({}).then((blogposts) => {
-    res.json({blogposts: blogposts});
-    
-  });
+  Blogpost.find({}).then(blogposts => res.json({blogposts}))
+    .catch((error) => {
+      console.error(error);
+      res.status(500).json({message: "Internal server error"});
+    });
 });
 
 // retrieve one blogpost by id
 app.get('/blogposts/:id', (req, res) => {
-  res.send(`one blogpost with id: ${req.params.id}`);
+  Blogpost.findById(req.params.id).then(blogpost => res.json({blogpost}))
+    .catch((error) => {
+      console.error(error);
+      res.status(500).json({message: "Internal server error"});
+    });
 });
 
 // add a blogpost
@@ -35,22 +38,37 @@ app.post('/blogposts', (req, res) => {
     title: req.body.title,
     content: req.body.content,
     author: req.body.author
-  }).then((blogpost) => {
-    res.status(201).json(blogpost);
-  }).catch((error) => {
-    res.status(500).json({message: "Internal Server Error"});
-  })
+  }).then((blogpost) => res.status(201).json({blogpost}))
+    .catch((error) => {
+      console.error(error);
+      res.status(500).json({message: "Internal Server Error"});
+    });
 });
 
 // update one blogpost by id
 app.put('/blogposts/:id', (req, res) => {
-  res.send(`update one blogpost with id: ${req.params.id}`);
+  // res.send(`update one blogpost with id: ${req.params.id}`);
+const toUpdate = req.body;
+
+  Blogpost.findByIdAndUpdate(req.params.id, {$set: toUpdate})
+    .then(() => res.status(204))
+    .catch((error) => {
+      console.error(error);
+      res.status(500).json({message: "Internal server error"});
+    });
 });
 
 // delete one blogpost by id
 app.delete('/blogposts/:id', (req, res) => {
-  res.send(`delete one blogpost with id: ${req.params.id}`);
+  Blogpost.findByIdAndRemove(req.params.id)
+    .then(() => res.status(204).end())
+    .catch((error) => {
+      console.error(error);
+      res.status(500).json({message: "Internal server error"});
+    })
 });
+
+let server;
 
 // this function connects to our database, then starts the server
 function runServer(databaseUrl, port) {
