@@ -34,6 +34,8 @@ app.get('/blogposts/:id', (req, res) => {
 
 // add a blogpost
 app.post('/blogposts', (req, res) => {
+  // TODO: check for required fields and log/send message for missing fields with 400
+
   Blogpost.create({
     title: req.body.title,
     content: req.body.content,
@@ -48,6 +50,8 @@ app.post('/blogposts', (req, res) => {
 // update one blogpost by id
 app.put('/blogposts/:id', (req, res) => {
   // res.send(`update one blogpost with id: ${req.params.id}`);
+
+// TODO: check for valid fields to update
 const toUpdate = req.body;
 
   Blogpost.findByIdAndUpdate(req.params.id, {$set: toUpdate})
