@@ -3,7 +3,7 @@
 const express = require('express');
 const mongoose = require('mongoose');
 
-const { DATABASE_URL, PORT} = require('./config');
+const {DATABASE_URL, PORT} = require('./config');
 
 const {Blogpost} = require("./models");
 
@@ -34,7 +34,16 @@ app.get('/blogposts/:id', (req, res) => {
 
 // add a blogpost
 app.post('/blogposts', (req, res) => {
-  // TODO: check for required fields and log/send message for missing fields with 400
+  const requiredFields = ['title', 'content', 'author'];
+  const getMissingFieldMessage = (field) => `Missing field: '${field}' in request body.`;
+
+  for (let i=0; i<requiredFields.length; i++) {
+    const field = requiredFields[i];
+    if (!req.body[field]) {
+      console.error(getMissingFieldMessage(field));
+      return res.status(400).send(getMissingFieldMessage(field));
+    }
+  }
 
   Blogpost.create({
     title: req.body.title,
@@ -49,9 +58,10 @@ app.post('/blogposts', (req, res) => {
 
 // update one blogpost by id
 app.put('/blogposts/:id', (req, res) => {
-  // res.send(`update one blogpost with id: ${req.params.id}`);
+// TODO: check that id from req.body matches req.params otherwise log/send error
 
-// TODO: check for valid fields to update
+// TODO: check for valid fields to update. Only append valid fiends to toUpdate object
+
 const toUpdate = req.body;
 
   Blogpost.findByIdAndUpdate(req.params.id, {$set: toUpdate})
