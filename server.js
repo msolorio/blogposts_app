@@ -58,14 +58,24 @@ app.post('/blogposts', (req, res) => {
 
 // update one blogpost by id
 app.put('/blogposts/:id', (req, res) => {
-// TODO: check that id from req.body matches req.params otherwise log/send error
+  if (!(req.params.id && req.body.id && req.params.id === req.body.id)) {
+    const message = "Request path id must match request body id";
+    console.error(message);
+    return res.status(400).json({message});
+  }
 
-// TODO: check for valid fields to update. Only append valid fiends to toUpdate object
+  const validUpdateFields = ["author", "title", "content"];
+  const toUpdate = {};
 
-const toUpdate = req.body;
+  for (let i=0; i<validUpdateFields.length; i++) {
+    const field = req.body[validUpdateFields[i]];
+    if (field) {
+      toUpdate[validUpdateFields[i]] = field;
+    }
+  }
 
   Blogpost.findByIdAndUpdate(req.params.id, {$set: toUpdate})
-    .then(() => res.status(204))
+    .then((blogpost) => res.status(204).end())
     .catch((error) => {
       console.error(error);
       res.status(500).json({message: "Internal server error"});
