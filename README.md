@@ -1,3 +1,3 @@
-## Task Manager API
+## Blog API
 
-Blogging CRUD App with Node, Express, and Mongoose
+[Work in Progress] Using Express, Mongoose, MongoDB, and Node.js
