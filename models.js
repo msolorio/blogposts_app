@@ -11,6 +11,19 @@ const blogpostSchema = mongoose.Schema({
   }
 });
 
+blogpostSchema.virtual("authorName").get(function() {
+  return `${this.author.firstName} ${this.author.lastName}`.trim();
+});
+
+blogpostSchema.methods.serialize = function() {
+  return {
+    id: this._id,
+    title: this.title,
+    content: this.content,
+    author: this.authorName,
+  }
+};
+
 const Blogpost = mongoose.model("Blogpost", blogpostSchema);
 
 module.exports = {Blogpost};

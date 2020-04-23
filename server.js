@@ -16,7 +16,12 @@ mongoose.set('useFindAndModify', false);
 
 // retrieve all the blogposts
 app.get('/blogposts', (req, res) => {
-  Blogpost.find({}).then(blogposts => res.json({blogposts}))
+  // Blogpost.find({}).then(blogposts => res.json({blogposts}))
+  Blogpost.find({}).then(blogposts => {
+    res.json({
+      blogposts: blogposts.map(post => post.serialize())
+    })
+  })
     .catch((error) => {
       console.error(error);
       res.status(500).json({message: "Internal server error"});
@@ -25,7 +30,7 @@ app.get('/blogposts', (req, res) => {
 
 // retrieve one blogpost by id
 app.get('/blogposts/:id', (req, res) => {
-  Blogpost.findById(req.params.id).then(blogpost => res.json({blogpost}))
+  Blogpost.findById(req.params.id).then(blogpost => res.json({blogpost: blogpost.serialize()}))
     .catch((error) => {
       console.error(error);
       res.status(500).json({message: "Internal server error"});
@@ -49,7 +54,7 @@ app.post('/blogposts', (req, res) => {
     title: req.body.title,
     content: req.body.content,
     author: req.body.author
-  }).then((blogpost) => res.status(201).json({blogpost}))
+  }).then((blogpost) => res.status(201).json({blogpost: blogpost.serialize()}))
     .catch((error) => {
       console.error(error);
       res.status(500).json({message: "Internal Server Error"});
