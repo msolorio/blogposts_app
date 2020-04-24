@@ -17,11 +17,13 @@ mongoose.set('useFindAndModify', false);
 // retrieve all the blogposts
 app.get('/blogposts', (req, res) => {
   // Blogpost.find({}).then(blogposts => res.json({blogposts}))
-  Blogpost.find({}).then(blogposts => {
-    res.json({
-      blogposts: blogposts.map(post => post.serialize())
+  Blogpost.find({})
+    .populate('author')
+    .then(blogposts => {
+      res.json({
+        blogposts: blogposts.map(post => post.serialize())
+      })
     })
-  })
     .catch((error) => {
       console.error(error);
       res.status(500).json({message: "Internal server error"});
