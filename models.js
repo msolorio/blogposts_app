@@ -29,12 +29,11 @@ blogpostSchema.methods.serialize = function() {
     id: this._id,
     title: this.title,
     content: this.content,
-    author: this.authorName,
-    comments: this.comments
+    author: this.authorName
   }
 };
 
-const Author = mongoose.model("Author". authorSchema);
+const Author = mongoose.model("Author", authorSchema);
 const Blogpost = mongoose.model("Newblogpost", blogpostSchema);
 
 module.exports = {

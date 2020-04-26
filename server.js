@@ -5,7 +5,10 @@ const mongoose = require('mongoose');
 
 const {DATABASE_URL, PORT} = require('./config');
 
-const {Blogpost} = require("./models");
+const {
+  Blogpost,
+  Author
+} = require("./models");
 
 const app = express();
 app.use(express.json());
@@ -16,7 +19,6 @@ mongoose.set('useFindAndModify', false);
 
 // retrieve all the blogposts
 app.get('/blogposts', (req, res) => {
-  // Blogpost.find({}).then(blogposts => res.json({blogposts}))
   Blogpost.find({})
     .populate('author')
     .then(blogposts => {
@@ -32,7 +34,9 @@ app.get('/blogposts', (req, res) => {
 
 // retrieve one blogpost by id
 app.get('/blogposts/:id', (req, res) => {
-  Blogpost.findById(req.params.id).then(blogpost => res.json({blogpost: blogpost.serialize()}))
+  Blogpost.findById(req.params.id)
+    .populate('author')
+    .then(blogpost => res.json({blogpost: blogpost.serialize()}))
     .catch((error) => {
       console.error(error);
       res.status(500).json({message: "Internal server error"});
@@ -41,7 +45,7 @@ app.get('/blogposts/:id', (req, res) => {
 
 // add a blogpost
 app.post('/blogposts', (req, res) => {
-  const requiredFields = ['title', 'content', 'author'];
+  const requiredFields = ['title', 'content', 'author_id'];
   const getMissingFieldMessage = (field) => `Missing field: '${field}' in request body.`;
 
   for (let i=0; i<requiredFields.length; i++) {
@@ -52,11 +56,12 @@ app.post('/blogposts', (req, res) => {
     }
   }
 
-  Blogpost.create({
-    title: req.body.title,
-    content: req.body.content,
-    author: req.body.author
-  }).then((blogpost) => res.status(201).json({blogpost: blogpost.serialize()}))
+    Blogpost.create({
+      title: req.body.title,
+      content: req.body.content,
+      author: mongoose.Types.ObjectId(req.body.author_id)
+    })
+    .then((blogpost) => res.status(201).end())
     .catch((error) => {
       console.error(error);
       res.status(500).json({message: "Internal Server Error"});
