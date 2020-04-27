@@ -30,7 +30,7 @@ blogpostSchema.methods.serialize = function() {
     title: this.title,
     content: this.content,
     author: this.authorName
-  }
+  };
 };
 
 const Author = mongoose.model("Author", authorSchema);

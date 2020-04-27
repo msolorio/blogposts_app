@@ -28,7 +28,7 @@ app.get('/blogposts', (req, res) => {
     })
     .catch((error) => {
       console.error(error);
-      res.status(500).json({message: "Internal server error"});
+      res.status(500).json({message: "Internal server error attempting GET to /blogposts"});
     });
 });
 
@@ -39,7 +39,7 @@ app.get('/blogposts/:id', (req, res) => {
     .then(blogpost => res.json({blogpost: blogpost.serialize()}))
     .catch((error) => {
       console.error(error);
-      res.status(500).json({message: "Internal server error"});
+      res.status(500).json({message: "Internal server error attempting GET to /blogposts/:id"});
     });
 });
 
@@ -68,7 +68,7 @@ app.post('/blogposts', (req, res) => {
       .then((blogpost) => res.status(201).end())
       .catch((error) => {
         console.error(error);
-        res.status(500).json({message: "Internal Server Error"});
+        res.status(500).json({message: "Internal server error attempting POST to /blogposts"});
       });
 
     })
@@ -103,7 +103,7 @@ app.put('/blogposts/:id', (req, res) => {
     .then((blogpost) => res.status(204).end())
     .catch((error) => {
       console.error(error);
-      res.status(500).json({message: "Internal server error"});
+      res.status(500).json({message: "Internal server error attempting PUT to /blogposts/:id"});
     });
 });
 
@@ -113,19 +113,87 @@ app.delete('/blogposts/:id', (req, res) => {
     .then(() => res.status(204).end())
     .catch((error) => {
       console.error(error);
-      res.status(500).json({message: "Internal server error"});
+      res.status(500).json({message: "Internal server error attempting DELETE to /blogposts/:id"});
     })
 });
 
 // POST /authors - create author
+app.post('/authors', (req, res) => {
+  const requiredFields = ['firstName', 'lastName', 'userName'];
+  const getMissingFieldMessage = (field) => `Missing field: '${field}' in request body.`;
+
+  for (let i=0; i<requiredFields.length; i++) {
+    const field = requiredFields[i];
+    if (!req.body[field]) {
+      console.error(getMissingFieldMessage(field));
+      return res.status(400).send(getMissingFieldMessage(field));
+    }
+  }
+
+  Author.create({
+    firstName: req.body.firstName,
+    lastName: req.body.lastName,
+    userName: req.body.userName
+  })
+  .then(() => res.status(201).end())
+  .catch(error => {
+    console.error(error);
+    res.status(500).json({message: "Internal server error attempting POST to /authors"});
+  });
+});
 
 // PUT /authors/:id - update authors firstName, lastName, and userName
+app.put('/authors/:id', (req, res) => {
+  if (!(req.params.id && req.body.id && req.params.id === req.body.id)) {
+    const message = "Request path id must match request body id";
+    console.error(message);
+    return res.status(400).json({message});
+  }
+
+  const validUpdateFields = ["firstName", "lastName", "userName"];
+  const toUpdate = {};
+
+  for (let i=0; i<validUpdateFields.length; i++) {
+    const field = req.body[validUpdateFields[i]];
+    if (field) {
+      toUpdate[validUpdateFields[i]] = field;
+    }
+  }
+
+  Author.findByIdAndUpdate(req.params.id, {$set: toUpdate})
+    .then(() => res.status(204).end())
+    .catch((error) => {
+      console.error(error);
+      res.status(500).json({message: "Internal server error attempting PUT to /author/:id"});
+    });
+});
 
 // DELETE /authors/:id - delete author by id
+app.delete('/authors/:id', (req, res) => {
+
+  // remove author by id
+  Author.findByIdAndRemove(req.params.id)
+    .then((author) => {
+
+      // remove all blogposts associated with author
+      Blogpost.deleteMany({author: mongoose.Types.ObjectId(author._id)})
+        .then(() => {
+          res.status(204).end();
+        }).
+        catch(error => {
+          console.error(error);
+          res.status(500).json({message: "Internal server error attempting to remove blogposts from deleted author"});
+        });
+    })
+    .catch((error) => {
+      console.error(error);
+      res.status(500).json({message: "Internal server error attempting DELETE to /author/:id"});
+    });
+});
 
 let server;
 
-// this function connects to our database, then starts the server
+// connect to database and start server
 function runServer(databaseUrl, port) {
   return new Promise((resolve, reject) => {
     mongoose.connect(
