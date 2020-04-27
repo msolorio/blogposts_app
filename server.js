@@ -1,14 +1,12 @@
 'use strict';
 
+require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
 
-const {DATABASE_URL, PORT} = require('./config');
+const {DATABASE_URL, PORT} = process.env;
 
-const {
-  Blogpost,
-  Author
-} = require("./models");
+const {Blogpost, Author} = require("./models");
 
 const app = express();
 app.use(express.json());

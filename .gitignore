@@ -1,5 +1,7 @@
 node_modules/
+yarn-error.log
 config.js
+.env
 seed-data.json
 authors-seed-data.json
 blogposts-seed-data.json
