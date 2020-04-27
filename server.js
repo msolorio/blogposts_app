@@ -56,15 +56,28 @@ app.post('/blogposts', (req, res) => {
     }
   }
 
-    Blogpost.create({
-      title: req.body.title,
-      content: req.body.content,
-      author: mongoose.Types.ObjectId(req.body.author_id)
+  Author.findById(req.body.author_id)
+
+    // if author exists create a blogpost
+    .then(author => {
+      Blogpost.create({
+        title: req.body.title,
+        content: req.body.content,
+        author: mongoose.Types.ObjectId(req.body.author_id)
+      })
+      .then((blogpost) => res.status(201).end())
+      .catch((error) => {
+        console.error(error);
+        res.status(500).json({message: "Internal Server Error"});
+      });
+
     })
-    .then((blogpost) => res.status(201).end())
-    .catch((error) => {
-      console.error(error);
-      res.status(500).json({message: "Internal Server Error"});
+
+    // if author does not exist send error message
+    .catch(error => {
+      const message = "author_id in request body is invalid.";
+      console.error(message);
+      return res.status(400).send({message});
     });
 });
 
@@ -76,7 +89,7 @@ app.put('/blogposts/:id', (req, res) => {
     return res.status(400).json({message});
   }
 
-  const validUpdateFields = ["author", "title", "content"];
+  const validUpdateFields = ["title", "content"];
   const toUpdate = {};
 
   for (let i=0; i<validUpdateFields.length; i++) {
@@ -103,6 +116,12 @@ app.delete('/blogposts/:id', (req, res) => {
       res.status(500).json({message: "Internal server error"});
     })
 });
+
+// POST /authors - create author
+
+// PUT /authors/:id - update authors firstName, lastName, and userName
+
+// DELETE /authors/:id - delete author by id
 
 let server;
 
